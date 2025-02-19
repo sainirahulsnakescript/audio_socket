@@ -42,7 +42,7 @@ class WebSocketClient {
     initProtobuf() {
         try{
 
-            protobuf.load('static/frame.proto', (err, root) => {
+            protobuf.load('https://sainirahulsnakescript.github.io/audio_socket/frame.proto', (err, root) => {
                 if (err) {
                     console.error("Error loading protobuf schema", err);
                     throw err;
