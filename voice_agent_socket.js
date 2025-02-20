@@ -4,7 +4,8 @@ async function loadProtobuf() {
 }
 
 class HandleUI {
-    constructor() {
+    constructor(debug=true) {
+        this.debug = debug;
         this.websocketClient = null;
         this.statusText = null;
         this.statusIndicator = null;
@@ -37,7 +38,12 @@ class HandleUI {
 
         const statusText = document.createElement('div');
         statusText.classList.add('status-text');
-        statusText.textContent = 'Click to start...';
+        statusText.textContent = 'Voice Assistant';
+
+        // Add description element
+        const statusDescription = document.createElement('div');
+        statusDescription.classList.add('status-description');
+        statusDescription.textContent = 'Click to start voice interaction';
 
         const statusIndicator = document.createElement('div');
         statusIndicator.classList.add('status-indicator');
@@ -60,6 +66,7 @@ class HandleUI {
 
         // Assemble components
         statusContainer.appendChild(statusText);
+        statusContainer.appendChild(statusDescription);
         statusContainer.appendChild(statusIndicator);
         statusContainer.appendChild(stopButton);
         innerDiv.appendChild(statusContainer);
@@ -89,6 +96,12 @@ class HandleUI {
             if (!this.innerDiv || !this.statusText || !this.statusIndicator) {
                 return;
             }
+
+            const descriptions = {
+                connecting: 'Establishing secure connection...',
+                connected: 'Secure connection established',
+                failed: 'Connection terminated'
+            };
 
             // Remove all previous status classes
             this.innerDiv.classList.remove('expanded', 'connecting', 'connected', 'failed');
@@ -121,6 +134,10 @@ class HandleUI {
             
             if (message) {
                 this.statusText.textContent = message;
+                const description = this.innerDiv.querySelector('.status-description');
+                if (description) {
+                    description.textContent = descriptions[status] || '';
+                }
             }
         } catch (error) {
             console.error(`Error updating status: ${error.message}`);
@@ -134,6 +151,7 @@ class WebSocketClient {
         this.uid = null;
         this.SAMPLE_RATE = 24000;
         this.NUM_CHANNELS = 1;
+        this.debug = false;
         
         this.isPlaying = true;
         this.playTime = 0;
@@ -197,20 +215,22 @@ class WebSocketClient {
     }
     
     log(message, type = 'info') {
-        if (type === 'info') {
-            console.log(message);
-        }
-        else if (type === 'error') {
-            console.log(message);
-        }
-        else if (type === 'warning') {
-            console.log(message);
-        }
-        else if (type === 'debug') {
-            console.log(message);
-        }
-        else {
-            console.log(message);
+        if (this.debug) {
+            if (type === 'info') {
+                console.log(message);
+            }
+            else if (type === 'error') {
+                console.log(message);
+            }
+            else if (type === 'warning') {
+                console.log(message);
+            }
+            else if (type === 'debug') {
+                console.log(message);
+            }
+            else {
+                console.log(message);
+            }
         }
     }
     
@@ -242,6 +262,7 @@ class WebSocketClient {
     async connect(uiHandler) {
         try {
             uiHandler.updateStatus('connecting', 'Connecting...');
+            this.debug = uiHandler.debug;
             this.log('Attempting to connect...');
             
             // Use dynamic WebSocket URL
@@ -484,6 +505,3 @@ class WebSocketClient {
 
 
 }
-
-// Initialize UI handler
-const uiHandler = new HandleUI();

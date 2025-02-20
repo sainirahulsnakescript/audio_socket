@@ -1,8 +1,8 @@
 .voice-agent-circle {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    bottom: 30px;
+    right: 30px;
+    transform: none;
     width: 60px;
     height: 60px;
     background: linear-gradient(145deg, #0073e6, #00c6ff);
@@ -100,35 +100,35 @@
 }
 
 .voice-agent-circle:hover {
-    transform: scale(1.05);
     box-shadow: 0 8px 25px rgba(0, 115, 230, 0.4);
 }
 
 /* Enhanced expanded state */
 .voice-agent-circle.expanded {
-    width: 320px;
-    height: 200px;
-    border-radius: 30px;
-    transform: translate(-50%, -50%) scale(1);
+    width: 380px;
+    height: 280px;
+    border-radius: 25px;
+    transform: none;
+    right: 30px;
+    bottom: 30px;
     background: linear-gradient(165deg, #0073e6, #00c6ff);
-    animation: expandSmoothEnhanced 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+    animation: expandSmoothEnhanced 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
 
-/* Status container with better spacing */
+/* Status container improvements */
 .voice-agent-circle .status-container {
-    position: absolute;
+    position: relative;
     opacity: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 15px;
     align-items: center;
-    justify-content: space-evenly;
+    justify-items: center;
     color: white;
     visibility: hidden;
     transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     transform: translateY(20px);
-    padding: 20px;
+    padding: 25px;
 }
 
 .voice-agent-circle.expanded .status-container {
@@ -139,23 +139,33 @@
 
 /* Enhanced status text */
 .status-text {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 10px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     letter-spacing: 0.5px;
 }
 
-/* Improved loading dots */
+/* New status description */
+.status-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.4;
+}
+
+/* Improved loading indicator */
 .status-indicator {
     display: flex;
-    gap: 8px;
-    margin-bottom: 25px;
+    gap: 12px;
+    margin: 20px 0;
 }
 
 .status-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     background-color: white;
     border-radius: 50%;
     opacity: 0.4;
@@ -168,49 +178,36 @@
 
 /* Enhanced stop button */
 .stop-button {
-    padding: 12px 30px;
-    border: 2.5px solid rgba(255, 255, 255, 0.9);
+    padding: 14px 35px;
+    border: none;
     border-radius: 30px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0073e6;
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    backdrop-filter: blur(8px);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px);
-}
-
-.voice-agent-circle.expanded .stop-button {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .stop-button:hover {
     background: white;
-    color: #0073e6;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Enhanced status-specific styles */
+/* Status-specific styles */
 .voice-agent-circle.connecting {
-    background: linear-gradient(165deg, #ffa500, #ff7b00);
-    box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
+    background: linear-gradient(165deg, #0073e6, #00c6ff);
 }
 
 .voice-agent-circle.connected {
     background: linear-gradient(165deg, #00b894, #00d1a0);
-    box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
 }
 
 .voice-agent-circle.failed {
     background: linear-gradient(165deg, #ff4757, #ff6b81);
-    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
 }
 
 /* Enhanced animations */
@@ -220,15 +217,10 @@
         height: 60px;
         border-radius: 50%;
     }
-    40% {
-        width: 320px;
-        height: 60px;
-        border-radius: 30px;
-    }
     100% {
-        width: 320px;
-        height: 200px;
-        border-radius: 30px;
+        width: 380px;
+        height: 280px;
+        border-radius: 25px;
     }
 }
 
@@ -263,18 +255,16 @@
     transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Add glass effect for modern look */
+/* Add glass morphism effect */
 .voice-agent-circle.expanded::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.1) 0%,
+        135deg,
+        rgba(255, 255, 255, 0.2) 0%,
         rgba(255, 255, 255, 0.05) 100%
     );
-    border-radius: 30px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
 }
