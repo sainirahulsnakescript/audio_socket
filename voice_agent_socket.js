@@ -505,3 +505,5 @@ class WebSocketClient {
 
 
 }
+
+const voiceAgent = new VoiceAgent();
