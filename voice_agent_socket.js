@@ -3,7 +3,7 @@ async function loadProtobuf() {
     return true;
 }
 
-class HandleUI {
+class VoiceAgent {
     constructor(debug=true) {
         this.debug = debug;
         this.websocketClient = null;
@@ -70,7 +70,7 @@ class HandleUI {
         statusContainer.appendChild(statusIndicator);
         statusContainer.appendChild(stopButton);
         innerDiv.appendChild(statusContainer);
-        this.voiceAgentContainer.appendChild(innerDiv);
+        document.body.appendChild(innerDiv);
 
         // Add event listeners
         innerDiv.addEventListener('click', () => {
