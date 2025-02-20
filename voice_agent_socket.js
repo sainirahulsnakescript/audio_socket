@@ -506,4 +506,7 @@ class WebSocketClient {
 
 }
 
-const voiceAgent = new VoiceAgent();
+
+document.addEventListener('DOMContentLoaded', () => {
+    const voiceAgent = new VoiceAgent();
+});
