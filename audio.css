@@ -1,0 +1,280 @@
+.voice-agent-circle {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, #0073e6, #00c6ff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    overflow: hidden;
+}
+
+/* Sound wave animation in idle state */
+.voice-agent-circle::before {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Custom voice wave bars - Improved visibility */
+.voice-wave {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 28px;
+}
+
+.voice-wave span {
+    width: 4px;
+    height: 100%;
+    background-color: white;
+    border-radius: 15px;
+    animation: wave var(--delay) ease-in-out infinite;
+}
+
+/* Enhanced wave bars with different heights */
+.voice-wave span:nth-child(1) {
+    height: 65%;
+    --delay: 1s;
+}
+
+.voice-wave span:nth-child(2) {
+    height: 100%;
+    --delay: 0.8s;
+}
+
+.voice-wave span:nth-child(3) {
+    height: 85%;
+    --delay: 1.2s;
+}
+
+.voice-wave span:nth-child(4) {
+    height: 100%;
+    --delay: 0.9s;
+}
+
+.voice-wave span:nth-child(5) {
+    height: 65%;
+    --delay: 1.1s;
+}
+
+@keyframes wave {
+    0%, 100% {
+        transform: scaleY(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scaleY(0.3);
+        opacity: 0.5;
+    }
+}
+
+/* Hide wave animation when expanded */
+.voice-agent-circle.expanded .voice-wave {
+    display: none;
+}
+
+/* Pulsing background effect */
+.voice-agent-circle::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: -1;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.voice-agent-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 115, 230, 0.4);
+}
+
+/* Enhanced expanded state */
+.voice-agent-circle.expanded {
+    width: 320px;
+    height: 200px;
+    border-radius: 30px;
+    transform: translate(-50%, -50%) scale(1);
+    background: linear-gradient(165deg, #0073e6, #00c6ff);
+    animation: expandSmoothEnhanced 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Status container with better spacing */
+.voice-agent-circle .status-container {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    color: white;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform: translateY(20px);
+    padding: 20px;
+}
+
+.voice-agent-circle.expanded .status-container {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Enhanced status text */
+.status-text {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.5px;
+}
+
+/* Improved loading dots */
+.status-indicator {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.4;
+    transition: all 0.4s ease;
+}
+
+.status-dot.loading {
+    animation: loadingDotEnhanced 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+/* Enhanced stop button */
+.stop-button {
+    padding: 12px 30px;
+    border: 2.5px solid rgba(255, 255, 255, 0.9);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+}
+
+.voice-agent-circle.expanded .stop-button {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.stop-button:hover {
+    background: white;
+    color: #0073e6;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced status-specific styles */
+.voice-agent-circle.connecting {
+    background: linear-gradient(165deg, #ffa500, #ff7b00);
+    box-shadow: 0 8px 25px rgba(255, 165, 0, 0.4);
+}
+
+.voice-agent-circle.connected {
+    background: linear-gradient(165deg, #00b894, #00d1a0);
+    box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+}
+
+.voice-agent-circle.failed {
+    background: linear-gradient(165deg, #ff4757, #ff6b81);
+    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
+}
+
+/* Enhanced animations */
+@keyframes expandSmoothEnhanced {
+    0% {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+    }
+    40% {
+        width: 320px;
+        height: 60px;
+        border-radius: 30px;
+    }
+    100% {
+        width: 320px;
+        height: 200px;
+        border-radius: 30px;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes loadingDotEnhanced {
+    0%, 100% { 
+        transform: scale(1) translateY(0);
+        opacity: 0.4; 
+    }
+    50% { 
+        transform: scale(1.5) translateY(-2px);
+        opacity: 1; 
+    }
+}
+
+/* Smooth transitions for all elements */
+.voice-agent-circle * {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Add glass effect for modern look */
+.voice-agent-circle.expanded::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    border-radius: 30px;
+}

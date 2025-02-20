@@ -1,47 +1,158 @@
-class WebSocketClient {
+async function loadProtobuf() {
+    const protobufModule = await import('https://cdn.jsdelivr.net/npm/protobufjs@7.2.4/dist/protobuf.min.js');
+    return true;
+}
+
+class HandleUI {
     constructor() {
-        // Add base URL configuration
-        this.BASE_URL = window.location.hostname === 'localhost' 
-            ? 'ws://localhost:8000'
-            : `wss://${window.location.host}`;
-            
-        this.uid = null;
-        // Update these constants for better performance
-        this.SAMPLE_RATE = 24000; // Increased from 16000
-        this.NUM_CHANNELS = 1;  // Changed from 2 to 1 for better streaming
+        this.websocketClient = null;
+        this.statusText = null;
+        this.statusIndicator = null;
+        this.innerDiv = null;
+        this.voiceAgentContainer = document.getElementById('voice_agent_container');
         
-        // Audio state
+        this.initVoiceAgentContainer();
+    }
+
+    initVoiceAgentContainer() {
+        // Create main circle container
+        const innerDiv = document.createElement('div');
+        innerDiv.classList.add('voice-agent-circle');
+
+        // Create voice wave icon
+        const voiceWave = document.createElement('div');
+        voiceWave.classList.add('voice-wave');
+        
+        // Add 5 bars for the wave animation
+        for (let i = 0; i < 5; i++) {
+            const bar = document.createElement('span');
+            voiceWave.appendChild(bar);
+        }
+        
+        innerDiv.appendChild(voiceWave);
+
+        // Create status container and elements
+        const statusContainer = document.createElement('div');
+        statusContainer.classList.add('status-container');
+
+        const statusText = document.createElement('div');
+        statusText.classList.add('status-text');
+        statusText.textContent = 'Click to start...';
+
+        const statusIndicator = document.createElement('div');
+        statusIndicator.classList.add('status-indicator');
+        
+        // Add 3 loading dots
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('status-dot');
+            statusIndicator.appendChild(dot);
+        }
+
+        const stopButton = document.createElement('button');
+        stopButton.classList.add('stop-button');
+        stopButton.textContent = 'Stop';
+
+        // Store references
+        this.statusText = statusText;
+        this.statusIndicator = statusIndicator;
+        this.innerDiv = innerDiv;
+
+        // Assemble components
+        statusContainer.appendChild(statusText);
+        statusContainer.appendChild(statusIndicator);
+        statusContainer.appendChild(stopButton);
+        innerDiv.appendChild(statusContainer);
+        this.voiceAgentContainer.appendChild(innerDiv);
+
+        // Add event listeners
+        innerDiv.addEventListener('click', () => {
+            if (!innerDiv.classList.contains('expanded')) {
+                this.updateStatus('connecting', 'Connecting...');
+                this.websocketClient = new WebSocketClient();
+                this.websocketClient.connect(this);
+            }
+        });
+
+        stopButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.updateStatus('failed', 'Stopping...');
+            if (this.websocketClient) {
+                this.websocketClient.disconnect();
+                this.websocketClient = null;
+            }
+        });
+    }
+
+    updateStatus(status, message) {
+        try {
+            if (!this.innerDiv || !this.statusText || !this.statusIndicator) {
+                return;
+            }
+
+            // Remove all previous status classes
+            this.innerDiv.classList.remove('expanded', 'connecting', 'connected', 'failed');
+            
+            // Update status based on the status parameter
+            switch (status) {
+                case 'connecting':
+                    this.innerDiv.classList.add('expanded', 'connecting');
+                    Array.from(this.statusIndicator.children).forEach(dot => {
+                        dot.classList.add('loading');
+                    });
+                    break;
+                case 'connected':
+                    this.innerDiv.classList.add('expanded', 'connected');
+                    Array.from(this.statusIndicator.children).forEach(dot => {
+                        dot.classList.remove('loading');
+                    });
+                    break;
+                case 'failed':
+                    this.innerDiv.classList.add('failed');
+                    Array.from(this.statusIndicator.children).forEach(dot => {
+                        dot.classList.remove('loading');
+                    });
+                    break;
+                default:
+                    Array.from(this.statusIndicator.children).forEach(dot => {
+                        dot.classList.remove('loading');
+                    });
+            }
+            
+            if (message) {
+                this.statusText.textContent = message;
+            }
+        } catch (error) {
+            console.error(`Error updating status: ${error.message}`);
+        }
+    }
+}
+
+class WebSocketClient {
+    constructor(url=null) {
+        this.BASE_URL = url ? url : 'ws://localhost:8000';
+        this.uid = null;
+        this.SAMPLE_RATE = 24000;
+        this.NUM_CHANNELS = 1;
+        
         this.isPlaying = true;
         this.playTime = 0;
         this.Frame = null;
         this.audioContext = null;
-        
-        // Initialize protobuf
-        this.initProtobuf();
-        
-        // DOM elements
-        this.initDOMElements();
-        
-        // Audio setup
-        this.initAudioSystem();
-        
-        // Setup remaining properties
         this.ws = null;
-        this.audioQueue = [];
-        this.audioWorkletNode = null;
-        this.audioProcessor = null;
-
-        // Microphone setup
+        
         this.microphoneStream = null;
         this.scriptProcessor = null;
         this.source = null;
         
+        this.initProtobuf();
+        this.initAudioSystem();
         this.setupEventListeners();
     }
 
-    initProtobuf() {
+    async initProtobuf() {
         try{
-
+            await loadProtobuf();
             protobuf.load('https://sainirahulsnakescript.github.io/audio_socket/frame.proto', (err, root) => {
                 if (err) {
                     console.error("Error loading protobuf schema", err);
@@ -51,24 +162,6 @@ class WebSocketClient {
             });
         } catch (error) {
             this.log(`Error loading protobuf schema: ${error.message}`, 'error');
-        }
-    }
-
-    initDOMElements() {
-        try{
-            this.statusIndicator = document.querySelector('.status-indicator');
-            this.statusText = document.getElementById('connection-status');
-            this.logContainer = document.getElementById('log-container');
-            this.connectBtn = document.getElementById('start-btn');
-            this.disconnectBtn = document.getElementById('stop-btn');
-            this.languageSelect = document.getElementById('language-select');
-            this.audioListBtn = document.getElementById('audio-list-btn');
-
-            this.audioListBtn.addEventListener('click', () => {
-                window.location.href = '/audio_list/';
-            });
-        } catch (error) {
-            this.log(`Error initializing DOM elements: ${error.message}`, 'error');
         }
     }
 
@@ -97,9 +190,6 @@ class WebSocketClient {
                     this.log('Audio resumed after user interaction', 'info');
                 }
             }, { once: true }); // Only handle first click
-            
-            this.connectBtn.addEventListener('click', () => this.connect());
-            this.disconnectBtn.addEventListener('click', () => this.disconnect());
             this.Frame = null;
         } catch (error) {
             this.log(`Error setting up event listeners: ${error.message}`, 'error');
@@ -107,57 +197,30 @@ class WebSocketClient {
     }
     
     log(message, type = 'info') {
-        const entry = document.createElement('div');
-        entry.className = `log-entry log-${type}`;
-        const timestamp = new Date().toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-        entry.textContent = `${timestamp}: ${message}`;
-        this.logContainer.appendChild(entry);
-        this.logContainer.scrollTop = this.logContainer.scrollHeight;
-    }
-    
-    updateStatus(status, message) {
-        try {
-            const statusPanel = document.querySelector('.status-panel');
-            const statusText = document.getElementById('connection-status');
-            
-            // Remove all previous status classes
-            statusPanel.classList.remove('connecting', 'connected', 'error');
-            
-            // Add the new status class
-            if (status) {
-                statusPanel.classList.add(status);
-            }
-            
-            // Update the status text
-            if (statusText) {
-                statusText.textContent = message;
-            }
-        } catch (error) {
-            this.log(`Error updating status: ${error.message}`, 'error');
+        if (type === 'info') {
+            console.log(message);
+        }
+        else if (type === 'error') {
+            console.log(message);
+        }
+        else if (type === 'warning') {
+            console.log(message);
+        }
+        else if (type === 'debug') {
+            console.log(message);
+        }
+        else {
+            console.log(message);
         }
     }
     
     getAuthHeader() {
         try{
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = 'admin';
+            const password = 'admin123';
             return 'Basic ' + btoa(`${username}:${password}`);
         } catch (error) {
             this.log(`Error getting auth header: ${error.message}`, 'error');
-        }
-    }
-    
-    get_voice(){
-        try{
-            const voice = this.languageSelect.value;
-            return voice;
-        } catch (error) {
-            this.log(`Error getting voice: ${error.message}`, 'error');
-            return "";
         }
     }
     
@@ -176,28 +239,21 @@ class WebSocketClient {
     }
     
     
-    async connect() {
+    async connect(uiHandler) {
         try {
-            this.updateStatus('connecting', 'Connecting...');
+            uiHandler.updateStatus('connecting', 'Connecting...');
             this.log('Attempting to connect...');
             
             // Use dynamic WebSocket URL
             const authHeader = this.getAuthHeader();
-            const voice = this.get_voice();
-            const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}&voice=${encodeURIComponent(voice)}`;
+            const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
             
             this.ws = new WebSocket(wsUrl);
             this.ws.binaryType = 'arraybuffer';
             
             this.ws.onopen = () => {
-                this.updateStatus('connected', 'Connected');
+                uiHandler.updateStatus('connected', 'Connected');
                 this.log('Connected successfully!', 'info');
-                this.log('Selected Voice: ' + voice, 'info');
-                this.connectBtn.disabled = true;
-                this.connectBtn.hidden = true;
-                this.disconnectBtn.disabled = false;
-                this.disconnectBtn.hidden = false;
-                this.languageSelect.disabled = true;
                 if (!this.audioContext) {
                     this.initAudioContext();
                 }
@@ -221,25 +277,18 @@ class WebSocketClient {
 
             
             this.ws.onerror = (error) => {
-                this.updateStatus('error', 'Error');
+                uiHandler.updateStatus('error', 'Error');
                 this.log(`WebSocket Error: ${error.message}`, 'error');
             };
             
             this.ws.onclose = () => {
-                this.updateStatus('', 'Disconnected');
+                uiHandler.updateStatus('', 'Disconnected');
                 this.log('Connection closed', 'error');
-                this.connectBtn.disabled = false;
-                this.connectBtn.hidden = false;
-                this.disconnectBtn.disabled = true;
-                this.disconnectBtn.hidden = true;
-                this.languageSelect.disabled = false;
                 this.stopAudio(false);
-                this.uid = null;
-                window.location.reload();
             };
             
         } catch (error) {
-            this.updateStatus('error', 'Error');
+            uiHandler.updateStatus('error', 'Error');
             this.log(`Connection Error: ${error.message}`, 'error');
         }
     }
@@ -435,3 +484,6 @@ class WebSocketClient {
 
 
 }
+
+// Initialize UI handler
+const uiHandler = new HandleUI();
