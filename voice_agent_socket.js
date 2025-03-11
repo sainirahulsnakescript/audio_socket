@@ -283,13 +283,13 @@ class WebSocketClient {
             
             this.ws.onmessage = async (event) => {
                 try {
-                    if (!this.uid) {
-                        const message = JSON.parse(event.data);
-                        if (message.type === "UID") {
-                            this.uid = message.uid;
-                            this.log(`UID: ${this.uid}`, 'info');
-                        }
-                    }
+                    // if (!this.uid) {
+                    //     const message = JSON.parse(event.data);
+                    //     if (message.type === "UID") {
+                    //         this.uid = message.uid;
+                    //         this.log(`UID: ${this.uid}`, 'info');
+                    //     }
+                    // }
                     this.handleWebSocketMessage(event);
                 } catch (error) {
                     this.log(`Error handling message: ${error.message}`, 'error');
