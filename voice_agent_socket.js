@@ -268,8 +268,8 @@ class WebSocketClient {
             
             // Use dynamic WebSocket URL
             const authHeader = this.getAuthHeader();
-            if (this.socket_url) {
-                const wsUrl = this.socket_url;
+            if (this.SOCKET_URL) {
+                const wsUrl = this.SOCKET_URL;
                 console.info("Using dynamic WebSocket URL: ", wsUrl);
             } else {
                 const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
