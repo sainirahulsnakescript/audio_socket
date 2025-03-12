@@ -4,14 +4,14 @@ async function loadProtobuf() {
 }
 
 class VoiceAgent {
-    constructor(debug=true) {
+    constructor(debug=true,websocketUrl=null) {
         this.debug = debug;
         this.websocketClient = null;
         this.statusText = null;
         this.statusIndicator = null;
         this.innerDiv = null;
         this.voiceAgentContainer = document.getElementById('voice_agent_container');
-        
+        this.websocketUrl = websocketUrl;
         this.initVoiceAgentContainer();
     }
 
@@ -267,7 +267,13 @@ class WebSocketClient {
             
             // Use dynamic WebSocket URL
             const authHeader = this.getAuthHeader();
-            const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
+            if (this.websocketUrl) {
+                const wsUrl = this.websocketUrl;
+                console.info("Using dynamic WebSocket URL: ", wsUrl);
+            } else {
+                const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
+                console.info("Using static WebSocket URL: ", wsUrl);
+            }
             
             this.ws = new WebSocket(wsUrl);
             this.ws.binaryType = 'arraybuffer';
@@ -283,13 +289,6 @@ class WebSocketClient {
             
             this.ws.onmessage = async (event) => {
                 try {
-                    // if (!this.uid) {
-                    //     const message = JSON.parse(event.data);
-                    //     if (message.type === "UID") {
-                    //         this.uid = message.uid;
-                    //         this.log(`UID: ${this.uid}`, 'info');
-                    //     }
-                    // }
                     this.handleWebSocketMessage(event);
                 } catch (error) {
                     this.log(`Error handling message: ${error.message}`, 'error');
@@ -507,6 +506,6 @@ class WebSocketClient {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const voiceAgent = new VoiceAgent();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     const voiceAgent = new VoiceAgent();
+// });
