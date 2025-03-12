@@ -76,7 +76,7 @@ class VoiceAgent {
         innerDiv.addEventListener('click', () => {
             if (!innerDiv.classList.contains('expanded')) {
                 this.updateStatus('connecting', 'Connecting...');
-                this.websocketClient = new WebSocketClient();
+                this.websocketClient = new WebSocketClient(this.websocketUrl);
                 this.websocketClient.connect(this);
             }
         });
@@ -146,8 +146,9 @@ class VoiceAgent {
 }
 
 class WebSocketClient {
-    constructor(url=null) {
-        this.BASE_URL = url ? url : 'ws://localhost:8000';
+    constructor(socket_url=null, base_url=null) {
+        this.SOCKET_URL = socket_url;
+        this.BASE_URL = base_url ? base_url : 'ws://localhost:8000';
         this.uid = null;
         this.SAMPLE_RATE = 24000;
         this.NUM_CHANNELS = 1;
@@ -267,8 +268,8 @@ class WebSocketClient {
             
             // Use dynamic WebSocket URL
             const authHeader = this.getAuthHeader();
-            if (this.websocketUrl) {
-                const wsUrl = this.websocketUrl;
+            if (this.socket_url) {
+                const wsUrl = this.socket_url;
                 console.info("Using dynamic WebSocket URL: ", wsUrl);
             } else {
                 const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
