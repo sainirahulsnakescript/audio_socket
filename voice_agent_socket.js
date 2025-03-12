@@ -267,12 +267,13 @@ class WebSocketClient {
             this.log('Attempting to connect...');
             
             // Use dynamic WebSocket URL
+            let wsUrl = null;
             const authHeader = this.getAuthHeader();
             if (this.SOCKET_URL) {
-                const wsUrl = this.SOCKET_URL;
+                wsUrl = this.SOCKET_URL;
                 console.info("Using dynamic WebSocket URL: ", wsUrl);
             } else {
-                const wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
+                wsUrl = `${this.BASE_URL}/ws/voices/?authorization=${encodeURIComponent(authHeader)}`;
                 console.info("Using static WebSocket URL: ", wsUrl);
             }
             
